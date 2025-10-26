@@ -89,11 +89,9 @@ You are encouraged to combine **artistic expression** with **data fidelity**. Us
 
 ## 📸 Output Example
 
-Include a screenshot of your visualization in the root directory:  
-`yourasurite.png`
 
 Example placeholder:  
-![Comet Visualization Example](imgs/smucher1.png)
+![Comet Visualization Example](smucher1.png)
 
 ---
 
