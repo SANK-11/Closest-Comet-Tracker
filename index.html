@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Celestial Comet Swirl</title>
+  <link rel="icon" type="image/png" href="earth.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #0a0a0a;
+      color: rgb(114, 177, 240);
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin: 20px auto;
+      font-size: 48px;
+      color: #72b1f0;
+      -webkit-text-stroke: 1.2px #0b49f3;
+      text-shadow: 0 0 8px #72b1f0;
+    }
+
+    p{
+      color: white;
+      text-align: center;
+      margin: 5px auto;
+      font-size: 18px;
+      font-weight: 500px;
+    }
+    h2{
+      color: rgb(114, 177, 240);
+      text-align: center;
+      margin: 5px auto;
+      font-size: 22px;
+    }
+    h3{
+      text-align: center;
+      color: #9cf;
+      font-size: 30px;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.85);
+      color: white;
+      padding: 8px;
+      border-radius: 5px;
+      pointer-events: none;
+      font-size: 13px;
+      max-width: 250px;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 10px 0 20px;
+      margin-top: 30px;
+    }
+    .controls label {
+      color: #9cf;
+      font-size: 19px;
+    }
+    select, input, button {
+      background: #222;
+      color: white;
+      border: 1px solid #555;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+    svg {
+      display: block;
+      margin: auto;
+      background: radial-gradient(circle at center, #222, #000);
+      border: 1px solid rgb(0, 0, 0);
+    }
+    .description {
+            max-width: 800px;
+            margin: 20px auto;
+            line-height: 1.6;
+            text-align: justify;
+        }
+        
+    .ccdec {
+      background: linear-gradient(145deg, rgba(10, 10, 10, 0.95), rgba(25, 25, 40, 0.85));
+      padding: 25px 30px;
+      border-radius: 15px;
+      margin: 40px auto;
+      max-width: 1800px;
+      border: 1px solid #3b7bd6;
+      box-shadow: 0 0 15px rgba(114, 177, 240, 0.4);
+      color: #e0f0ff;
+      font-size: 16px;
+      line-height: 1.7;
+      font-family: 'Segoe UI', sans-serif;
+      }
+    
+     .ccdec h3 {
+        color: #84caff;
+        font-size: 28px;
+        margin-top: 0;
+        border-bottom: 1px solid #444;
+        padding-bottom: 10px;
+    }
+
+    .ccdec ul {
+        margin-left: 20px;
+        padding-left: 20px;
+    }
+
+    .ccdec li {
+        margin-bottom: 8px;
+    }
+
+    .ccdec strong {
+        color: #aad4ff;
+    }
+
+    .ccdec .highlight {
+        color: #09b1c7;
+        font-weight: bold;
+    } 
+
+  </style>
+</head>
+<body>
+  <h1>Celestial Comet Swirl</h1>
+  <h2>Sankalp Mucherla Srinath - smucher1@asu.edu</h2>
+  <p>Comets with dynamic trails swirling around a center image. Fully animated with pause control.</p>
+
+  <div class="controls">
+    <label>Radius:
+      <select id="radiusatt">
+        <option value="P">Period</option>
+        <option value="Q">Aphelion</option>
+      </select>
+    </label>
+    <label>Angle:
+      <select id="angleAttr">
+        <option value="i">Inclination</option>
+        <option value="Node">Node</option>
+      </select>
+    </label>
+    <label>Color:
+      <select id="coloratt">
+        <option value="e">Eccentricity</option>
+        <option value="q">Perihelion</option>
+        <option value="Q">Aphelion</option>
+      </select>
+    </label>
+    <label>Size:
+      <select id="sizeAttr">
+        <option value="MOID">MOID</option>
+        <option value="P">Period</option>
+      </select>
+    </label>
+    <label>Comet:
+      <select id="csel"></select>
+    </label>
+    <button id="toggleAnimation">Pause</button>
+  </div>
+
+  <svg width="1500" height="800"></svg>
+  <div class="tooltip" style="opacity:0;"></div>
+
+  <div class="description ccdec">
+    <h3>Design Explanation</h3>
+    <p><strong>Marks</strong><ul> Each comet is represented as a distinctive orbital path with multiple petals. The shape and pattern of these petals encode information about the comet's orbital characteristics.</p></ul>
+    
+    <p><strong>Channels</strong>
+        <ul>
+            <li>The overall <span class="highlight">shape</span> of each orbit is determined by the comet's eccentricity and perihelion distance.</li>
+            <li>The number of <span class="highlight">petals</span> corresponds to the comet's inclination.</li>
+            <li><span class="highlight">Color</span> represent different attributes like comet family or orbital parameters.</li>
+            <li>The <span class="highlight">size</span> of each orbit reflects the comet's proximity to Earth (MOID).</li>
+        </ul>
+    </p>
+    
+    <p><strong>Interactions</strong>
+        <ul>
+            <li>Hover over any comet orbit to see detailed information</li>
+            <li>Use the dropdown menus to change how comets are colored, sized, and sorted</li>
+            <li>Animate the visualization to see the orbits in motion</li>
+            <li>Reset the view to return to the default state</li>
+        </ul>
+    </p>
+    
+    <h3>Custom Visualization Category</h3>
+    <p>This visualization falls into the <strong>combinatorial</strong> category of custom visualization. It combines elements of:
+        <ul>
+            <li>Radial plots (for representing orbital parameters)</li>
+            <li>Custom glyphs (each comet has a unique visual signature)</li>
+            <li>Interactive data exploration techniques</li>
+        </ul>
+        
+        The visualization creates a unique representation by mapping orbital parameters to aesthetic elements of flower-like patterns, creating a visual language that conveys multiple attributes simultaneously in an intuitive way. Unlike standard astronomical visualizations that use literal orbital paths, this abstract representation allows for more dimensions of data to be encoded and perceived at once.
+    </p>
+</div>
+</div>
+
+  <script>
+    const mapss = d3.select("svg").append("g").attr("transform", `translate(750, 400)`);
+    const ttip = d3.select(".tooltip");
+    const cselt = document.getElementById("csel");
+
+    const crtsl = {
+      r: document.getElementById("radiusatt"),
+      ag: document.getElementById("angleAttr"),
+      color: document.getElementById("coloratt"),
+      size: document.getElementById("sizeAttr")
+    };
+
+    let aniact = true;
+    let transs = [];
+    let cdataa = [];
+    let curvis = [];
+    let lselcm = null;
+
+    document.getElementById("toggleAnimation").addEventListener("click", () => {
+      aniact = !aniact;
+      document.getElementById("toggleAnimation").innerText = aniact ? "Pause" : "Start";
+      if (aniact) anicom();
+      else transs.forEach(t => t.interrupt());
+    });
+
+    // Stars in back
+    mapss.selectAll(".star")
+      .data(d3.range(150).map(() => ({
+        x: Math.random() * 1600 - 750,
+        y: Math.random() * 800 - 400,
+        r: Math.random() * 1.5,
+        o: Math.random() * 0.6 + 0.2
+      })))
+      .enter() .append("circle") .attr("class", "star").attr("cx", d => d.x).attr("cy", d => d.y) .attr("r", d => d.r) .attr("fill", "white")
+      .attr("opacity", d => d.o);
+
+    // Earth
+    mapss.append("image")
+      .attr("xlink:href", "earth.png") .attr("x", -40) .attr("y", -40)  .attr("width", 80) .attr("height", 80) .attr("id", "earth");
+
+
+    // Create  with Earth image
+    const defs = mapss.append("defs");
+    const desig = defs.append("pattern")
+      .attr("id", "earth-pattern")  .attr("width", 1).attr("height", 1) .attr("patternContentUnits", "objectBoundingBox");
+
+    desig.append("circle")
+      .attr("cx", 0.5) .attr("cy", 0.5) .attr("r", 0.5) .attr("fill", "#1E88E5");
+
+    desig.append("path")
+      .attr("d", "M0.3,0.3 Q0.5,0.1 0.7,0.3 T0.9,0.5 T0.7,0.7 T0.5,0.9 T0.3,0.7 T0.1,0.5 T0.3,0.3") .attr("fill", "#64B5F6") .attr("transform", "rotate(15, 0.5, 0.5)");
+
+    desig.append("path")
+      .attr("d", "M0.35,0.35 Q0.5,0.2 0.65,0.35 T0.8,0.5 T0.65,0.65 T0.5,0.8 T0.35,0.65 T0.2,0.5 T0.35,0.35")  .attr("fill", "#2E7D32") .attr("transform", "rotate(45, 0.5, 0.5)");
+
+    
+    d3.csv("near-earth-comets.csv").then(raw => {
+      cdataa = raw.filter(d => d.P && d.i && d.e && d.MOID && d.q && d.Q && d.Node).map((d, i) => {
+        d.P = +d.P;
+        d.i = +d.i;
+        d.e = +d.e;
+        d.MOID = +d.MOID;
+        d.q = +d.q;
+        d.Q = +d.Q;
+        d.Node = +d.Node;
+        d._offset = (2 * Math.PI / raw.length) * i * 1.5; 
+        return d;
+      });
+      
+      cselt.innerHTML = '<option value="">All Comets</option>';
+      cdataa.forEach(d => {
+        cselt.innerHTML += `<option value="${d.Object}">${d.Object}</option>`;
+      });
+      
+      
+      ddvis();      
+      Object.values(crtsl).forEach(ctrl => ctrl.addEventListener("change", () => {
+        ddvis();
+      }));
+      
+      cselt.addEventListener("change", liselcom);
+    });
+
+    function ddvis() {
+      mapss.selectAll(".trail, .comet").remove();
+      transs = [];
+      curvis = [];
+
+      const ratt = crtsl.r.value;
+      const aatt = crtsl.ag.value;
+      const catt = crtsl.color.value;
+      const satt = crtsl.size.value;
+
+      const rrad = d3.scaleLog() .domain(d3.extent(cdataa, d => d[ratt]))  .range([150, 350]); 
+      
+      const angi = d3.scaleLinear() .domain(d3.extent(cdataa, d => d[aatt])) .range([0, 4 * Math.PI]);
+      
+      const celor = d3.scaleSequential(d3.interpolateViridis) .domain(d3.extent(cdataa, d => d[catt]));
+      
+      const soze = d3.scaleSqrt().domain(d3.extent(cdataa, d => 1 / d[satt])).range([3, 8]);
+
+      cdataa.forEach((d, i) => {
+        const rounding = angi(d[aatt]);
+        const r = rrad(d[ratt]);
+        const pul = Math.max(3, Math.ceil(d.i / 20));
+        const steps = 150;
+        const trail = [];
+
+        for (let t = 0; t <= steps; t++) {
+          const thee = d._offset + (t / steps) * rounding;
+          const lone = r * (1 + 0.1 * Math.sin(3 * thee)); 
+          const x = (lone + 10 * Math.sin(pul * thee)) * Math.cos(thee);
+          const y = (lone + 10 * Math.sin(pul * thee)) * Math.sin(thee);
+          trail.push([x, y]);
+        }
+
+        const path = mapss.append("path") .datum(trail).attr("class", "trail") .attr("fill", "none") .attr("stroke", celor(d[catt]))
+          .attr("stroke-width", 1.2) .attr("opacity", 0.2) .attr("d", d3.line().curve(d3.curveCardinalClosed));
+
+        const comet = mapss.append("circle")
+          .attr("class", "comet") .attr("r", soze(1 / d[satt])) .attr("fill", celor(d[catt])) .attr("stroke", "white")
+          .attr("stroke-width", 0.5) .attr("data-name", d.Object).on("mouseover", event => { highloghting(d, event);  })
+          .on("mousemove", event => {
+            ttip.style("left", (event.pageX + 10) + "px")
+              .style("top", (event.pageY - 20) + "px");
+          })
+          .on("mouseout", () => ttip.style("opacity", 0));
+
+       curvis.push({
+          comet: comet,
+          path: path,
+          trail: trail,
+          data: d
+        });
+      });
+
+      if (aniact) {
+        anicom();
+      }      
+      if (lselcm) {
+        cselt.value = lselcm;
+        liselcom();
+      }
+    }
+    
+    function highloghting(d, event) {
+      ttip.style("opacity", 1)
+        .html(`<strong>${d.Object}</strong><br>
+          Period: ${d.P} yrs<br>
+          Inclination: ${d.i}&deg;<br>
+          Eccentricity: ${d.e}<br>
+          Perihelion: ${d.q}<br>
+          Aphelion: ${d.Q}<br>
+          MOID: ${d.MOID}`);
+          
+      if (event) {
+        ttip.style("left", (event.pageX + 10) + "px") .style("top", (event.pageY - 20) + "px");
+      } else {
+        const selviss = curvis.find(v => v.data.Object === d.Object);
+        if (selviss && selviss.comet) {
+          const bbox = selviss.comet.node().getBoundingClientRect();
+          ttip.style("left", (bbox.x + window.scrollX + 10) + "px")
+            .style("top", (bbox.y + window.scrollY - 20) + "px");
+        }
+      }
+    }
+
+    function anicom() {
+      transs = [];
+      
+      curvis.forEach(item => {
+        const transition = item.comet.transition().duration(4000 + Math.random() * 2000)  .ease(d3.easeLinear) .attrTween("transform", () => {
+            return t => {
+              const index = Math.floor(t * (item.trail.length - 1));
+              const [x, y] = item.trail[index];
+              item.path.attr("opacity", 0.1 + 0.5 * (1 - t)); 
+              return `translate(${x},${y})`;
+            };
+          })
+          .on("end", function() {
+            if (aniact) {
+             transs = transs.filter(trans => trans !== transition);
+              const ntransss = d3.select(this).transition() .duration(4000 + Math.random() * 2000)  .ease(d3.easeLinear)  .attrTween("transform", () => {
+                  return t => {
+                    const index = Math.floor(t * (item.trail.length - 1));
+                    const [x, y] = item.trail[index];
+                    item.path.attr("opacity", 0.1 + 0.5 * (1 - t));
+                    return `translate(${x},${y})`;
+                  };
+                })
+                .on("end", arguments.callee); 
+              
+              transs.push(ntransss);
+            }
+          });
+        
+        transs.push(transition);
+      });
+    }
+
+    function liselcom() {
+      const selnam = cselt.value;
+      lselcm = selnam;
+      
+      mapss.selectAll(".comet")
+        .attr("stroke-width", 0.5) .attr("r", function() {
+          const name = d3.select(this).attr("data-name");
+          const cob = cdataa.find(d => d.Object === name);
+          const satt = crtsl.size.value;
+          const size = d3.scaleSqrt()
+            .domain(d3.extent(cdataa, d => 1 / d[satt])) .range([3, 8]);
+          return size(1 / cob[satt]);
+        });
+      
+      mapss.selectAll(".trail").attr("opacity", 0.2) .attr("stroke-width", 1.2);
+        
+      ttip.style("opacity", 0);
+
+      if (selnam) {
+        const selcomm = mapss.selectAll(".comet").filter(function() {
+          return d3.select(this).attr("data-name") === selnam;
+        });
+        
+        selcomm
+          .attr("stroke-width", 3) .attr("r", function() {
+            return parseFloat(d3.select(this).attr("r")) * 1.5;
+          });
+        
+        mapss.selectAll(".trail").filter(function(d, i) {
+          return curvis[i].data.Object === selnam;
+        })
+        .attr("opacity", 0.8) .attr("stroke-width", 2);
+        
+        const cob = cdataa.find(d => d.Object === selnam);
+        if (cob) {
+          highloghting(cob);
+          
+          mapss.on("mousemove", function(event) {
+            const selviss = curvis.find(v => v.data.Object === selnam);
+            if (selviss && selviss.comet) {
+              const cometNode = selviss.comet.node();
+              if (cometNode) {
+                const cmrot = cometNode.getBoundingClientRect();
+                const mx = event.clientX;
+                const my = event.clientY;
+                
+                const dx = mx - (cmrot.x + cmrot.width/2);
+                const dy = my - (cmrot.y + cmrot.height/2);
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                
+                const pthres = 50; // pixels
+                if (distance < pthres) {
+                  highloghting(cob, event);
+                } else {
+                  ttip.style("opacity", 0);
+                }
+              }
+            }
+          });
+        }
+      } else {
+        mapss.on("mousemove", null);
+      }
+    }
+  </script>
+</body>
+</html>
